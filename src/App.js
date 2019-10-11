@@ -1,26 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
 import './App.css';
+import Forms from './Forms';
+import { reportToBurndown } from './api/toggl_report';
+import Graph from './Graph';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      graphLoading: false,
+      graphData: null
+    };
+  }
+
+  loadGraph(data) {
+    this.setState({ graphLoading: true });
+    reportToBurndown(data).then(graphData => {
+      console.log(graphData);
+      this.setState({ graphLoading: false, graphData });
+    });
+  }
+
+  render() {
+    const { graphLoading, graphData } = this.state;
+    return (
+      <div className="App">
+        <Forms onUpdate={data => this.loadGraph(data)} />
+        {!graphLoading && graphData && <Graph graphData={graphData} />}
+      </div>
+    );
+  }
 }
 
 export default App;
